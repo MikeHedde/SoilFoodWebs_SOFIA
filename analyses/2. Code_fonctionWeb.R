@@ -11,7 +11,7 @@
 
 # -----------------------------------------------------------------------------
 # NOTES:
-# Script fourni par Elisa le 16.08.15, calcul de quelques indices de réseau
+# Script fourni par Elisa le 16.08.15, calcul de quelques indices de r?seau
 # -----------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------
@@ -44,91 +44,7 @@ library(gtools)
 require(gplots)
 library(Hmisc)
 library(MuMIn)
-library(FSA) # fonction "Subset": enlève complètement le niveau des facteurs omis
-# -----------------------------------------------------------------------------
-
-# directory
-setwd("F:/5. RH/4. Post-doctorant/2014 SOFIA V Coudrain/dossier juin 2016/Scripts finaux")
-
-# -----------------------------------------------------------------------------
-# FUNCTIONS
-# -----------------------------------------------------------------------------
-    
-    # 1. FONCTIONS NIVEAUX TROPHIQUES
-    GetIND <- function(web){  # fonction pour calculer le nombre, la moyenne et le max des niveaux trophiques
-      
-      tweb <- t(web)
-      
-      ## La somme des lignes doit être 1
-      rs <- rowSums(tweb)
-      for(i in 1:length(tweb[,1]))
-        tweb[i,tweb[i,]>0] = tweb[i,tweb[i,]>0]/rs[i]
-      
-      nb.TL <- try(solve(diag(length(tweb[,1])) - tweb), T)
-      
-      if(class(nb.TL)=="try-error")
-        nbTL <- rep(NA, length(tweb[,1]))
-      
-      if(class(nb.TL)!="try-error")
-        nbTL <- rowSums(nb.TL)
-      
-      return(res <- list(nbTL, mean(nbTL),max(nbTL)))
-      
-    }
-    
-    
-    # 2. CHEMIN FONG:BACT
-    Path <- function(web, num){    #calcule pour chaque groupe la proportion de sa biomasse qui est
-      #originaire du groupe source "num" (num = position du gpe dans la matrice web)
-      tweb <- t(web)
-      Vectpath <- rep(0, length(web[,1]))  #definition du vecteur pour la source des effets indirects
-      Vectpath[num] <- 1
-      
-      ## Somme des lignes doit être 1
-      rs <- rowSums(tweb)
-      for(i in 1:length(tweb[,1]))
-        tweb[i,tweb[i,]>0] = tweb[i,tweb[i,]>0]/rs[i]
-      nb.TL <- try(solve(diag(length(tweb[,1])) - tweb), T)
-      if(class(nb.TL)=="try-error")
-        nbTL <- rep(NA, length(tweb[,1]))
-      if(class(nb.TL)!="try-error")
-        nbTL <- nb.TL%*%Vectpath
-      nbTL
-    }
-    
-    PropPath <- function(web, numP1, numP2, biom){   # calcule ratio des chemins bacterien sur fongique
-      #biom = vecteur des biomasses des groupes présents dans web
-      path1<-Path(web, numP1)
-      path2<-Path(web, numP2)
-      proppath<-(sum(biom * path1)) / (sum(biom * path2))
-      proppath
-    }
-    
-   
-    # 3. DIVERSITE DE LIENS
-    Nblinks<- function(web) {    #nombre de liens dans le réseau
-      flux<-as.vector(web)
-      flux<-flux[flux!=0]
-      nblink<-length(flux)
-      
-      nblink
-    }
-    
-    Divlinks<- function(web) {    #diversité de Shannon des liens
-      flux<-as.vector(web)
-      flux<-flux[flux!=0]
-      Ftot<-sum(flux)
-      div<-0
-      for (i in 1:length(flux))   div<-div - flux[i]/Ftot*log2(flux[i]/Ftot)
-      
-      div
-    }
-    
-    Evenlinks<- function(web) {    #evenness des liens
-      even<-Divlinks(web)/Nblinks(web)
-      
-      even
-    }
+library(FSA) # fonction "Subset": enl?ve compl?tement le niveau des facteurs omis
 # -----------------------------------------------------------------------------
 
 
@@ -140,7 +56,7 @@ setwd("F:/5. RH/4. Post-doctorant/2014 SOFIA V Coudrain/dossier juin 2016/Script
     Fluxmatlist.T2 <- readWorksheetFromFile("fluxmatT2.xlsx", sheet = 1:20, h = T, rownames = 1)
     Fluxmatlist.T4 <- readWorksheetFromFile("fluxmatT4.xlsx", sheet = 1:20, h = T, rownames = 1)
 
-    # la matrice générale pour récolter les données des sites 
+    # la matrice g?n?rale pour r?colter les donn?es des sites 
     basedat <- read.table("data_basefile.txt", h = T, sep = '\t', dec = ",")
     basedat <- Subset(basedat, Date!="Year3")
 # -----------------------------------------------------------------------------
@@ -178,12 +94,12 @@ setwd("F:/5. RH/4. Post-doctorant/2014 SOFIA V Coudrain/dossier juin 2016/Script
         
         write.xlsx(dfTLmaxmax,"F:/5. RH/4. Post-doctorant/2014 SOFIA V Coudrain/dossier juin 2016/Scripts finaux/dfTLmaxmax.xlsx")
         
-  # Rapport entre voie fongique et voie bactérienne
+  # Rapport entre voie fongique et voie bact?rienne
 
           # D'abord obtenir le vecteur de biomasses ##
-              # Attention à ce que l'ordre des groupes corresponde avec la matrice de flux
+              # Attention ? ce que l'ordre des groupes corresponde avec la matrice de flux
           
-          # ORDRER les groupes des matrices de flux dans l'ordre alphabétique!
+          # ORDRER les groupes des matrices de flux dans l'ordre alphab?tique!
           test[,order(names(test))]
           
           fluxmat_ordT0 <- lapply(Fluxmatlist.T0, function(x) x[order(names(x)), order(names(x))])
@@ -196,7 +112,7 @@ setwd("F:/5. RH/4. Post-doctorant/2014 SOFIA V Coudrain/dossier juin 2016/Script
           dataWEB_listT2 <- dataWEB_list[[2]]
           dataWEB_listT4 <- dataWEB_list[[3]]
           
-          # Petit test pour être sûr que les noms concordent
+          # Petit test pour ?tre s?r que les noms concordent
           NameVecT4_list <- lapply(dataWEB_listT4, function(x) factor(x$node))
           NamefluxT4_list <- lapply(fluxmat_ordT4, function(x) factor(names(x)))
           equtest <- list()
@@ -285,21 +201,6 @@ setwd("F:/5. RH/4. Post-doctorant/2014 SOFIA V Coudrain/dossier juin 2016/Script
               PropPath_dftot <- data.frame(basedat[, 1:5],rbind(dfPropPathBG_T0, dfPropPathBG_T2, dfPropPathBG_T4), rbind(dfPropPathBF_T0,dfPropPathBF_T2,dfPropPathBF_T4))
 
 
-                      # Figures ratio voies de flux d'énergie
-                      
-                      mydat <- PropPath_dftot[PropPath_dftot$Mod != "RR-PER",]
-                      g <- ggplot(data = mydat, aes(x = Date, y = log(BGpath), group=interaction(Date, Mod)))+
-                        geom_boxplot(aes(fill = factor(mydat$Mod))) +
-                        ylab("Brown to green pathways ratio (log)")
-                      
-                      g
-                      
-                      g <- ggplot(data = mydat, aes(x = Date, y = log(BFpath), group=interaction(Date, Mod)))+
-                        geom_boxplot(aes(fill = factor(mydat$Mod))) +
-                        ylab("Bacterial to fungal pathways ratio (log)")
-                      
-                      g
-
 
 
   # DIVERSITE DE LIENS
@@ -321,60 +222,4 @@ setwd("F:/5. RH/4. Post-doctorant/2014 SOFIA V Coudrain/dossier juin 2016/Script
     write.xlsx(df_totdiv,"F:/5. RH/4. Post-doctorant/2014 SOFIA V Coudrain/dossier juin 2016/Scripts finaux/df_totdiv.xlsx")
 
     
-    
-###################################
-# Quelques relations #
-###################################
-# Lire les données sauvées précédemment
-
-IndicesET <- read.table("data_indicesET.txt",sep="\t",header=T, dec=",")
-str(IndicesET)
-IndicesET$Mod <- factor(IndicesET$Mod, levels=c("CONV","RN","RT","RT-RR","RR-PER"))
-
-# Quelques transformations utiles pour les graphs
-IndicesET_wide <- melt(IndicesET, id.vars = c(1:5), measure.vars = c(6:11))
-IndicesET_basedat <- cbind(basedat[,c(1:5,11,17,23,28,30,32,35,38,41,44,47,50,53)],IndicesET[,-c(1:5)])
-Indbasedat_wide <- melt(IndicesET_basedat, id.vars = c(1:18), measure.vars = c(19:24))
-
-# Quelques graphs
-
-ggplot(data=IndicesET_wide, aes(x=value,group=variable)) +
-  geom_histogram(fill="#880011") +  
-  facet_grid(Date~variable, scales = "free") +
-  theme_bw()+
-  theme(panel.grid = element_blank())
-
-ggplot(data=IndicesET_wide, aes(x=Mod, y=value,group=Mod, color=Mod)) +
-  geom_boxplot(alpha=.4) +
-  geom_point(alpha=.4, size=3) +
-  facet_grid(variable~Date, scales = "free") +
-  theme_bw()+
-  theme(panel.grid = element_blank())
-
-names(Indbasedat_wide)
-
-# Relations avec les variables continues
-plotfct1 <- function(df, v="C.N_0.5"){
-  ggplot(data=df, aes_string(x=v, y="value")) +
-    geom_point(size=3, aes(col=Mod)) +
-    geom_smooth(alpha=0) +
-    facet_grid(variable~Date, scales = "free") +
-    theme_bw()+
-    theme(panel.grid = element_blank())
-}
-
-# Inverser x et y pour les variables de fonctions
-plotfct2 <- function(df, v="Nitrif_0.5"){
-  ggplot(data=df, aes_string(y=v, x="value")) +
-    geom_point(size=3, aes(col=Mod)) +
-    geom_smooth(alpha=0) +
-    facet_grid(Date~variable, scales = "free") +
-    theme_bw()+
-    theme(panel.grid = element_blank())
-}
-
-
-plotfct(Indbasedat_wide, v="C.N_0.5")
-plotfct2(Indbasedat_wide)
-
 
