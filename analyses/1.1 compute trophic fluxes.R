@@ -49,22 +49,12 @@ librarian::shelf(tidyr, dplyr)
 # -----------------------------------------------------------------------------
 # Loading trophic preference matrix 
 # -----------------------------------------------------------------------------
-entryweb <- read.table("data/raw-data/adjacency_matrix.txt", h = T, dec = ",")
+adjMat <- read.table("data/raw-data/adjacency_matrix.txt", h = T, dec = ",")
 # -----------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------
 # Mod?le utilisant l'estimation des biomasses des bact?ries et champignons
 # -----------------------------------------------------------------------------
-# Parameters definition
-  nomsp   <- names(entryweb)[-1]    # List of nodes
-  nbgp    <- length(nomsp)          # Total number of nodes
-  spID    <- 1:29                   # Nodes' ID 
-  web     <- tibble(entryweb) %>%
-                  pivot_longer(cols = !ID, names_to = "variable") %>%
-                  dplyr::filter(value > 0)
-  nbinter <- length(web$value)      # Total number of edges
-  res     <- data.frame(pred = match(web$ID, nomsp), prey = match(web$variable, nomsp), pred_pref = web$value) # remplacement des noms par les nr d'ID
-  res$numinter <- 1:nbinter         # edges' ID
 
 # Loading bacteria and fungi dataset
   Ref     <- 0.65 # valeur moyenne ratio biomasse bact sur champ dans SoilService, ? modifier pour regarder sensibilit? des r?sultats
@@ -94,10 +84,10 @@ entryweb <- read.table("data/raw-data/adjacency_matrix.txt", h = T, dec = ",")
     nest()
   
 # Load trophic flux model code
-  source("analyses/1. trophic flux model.R")
+  source("analyses/0.1. define trophic flux model.R")
   
 # Compute fluxes for each plot and each year
-  Fluxfct(dataplot_list[[3]][1], node, biomasstot, abundance, a, metaind)  #continuer
+  Fluxfct(dataplot_list[[3]][1], adjMat)  #continuer
   
 
 
