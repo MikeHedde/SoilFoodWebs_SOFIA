@@ -10,82 +10,41 @@
 # -----------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------
-# NOTES:
-# Modèle de flux trophiques créé par Elisa Thébault, code adapté par Valérie Coudrain
+# FUNCTION
 # -----------------------------------------------------------------------------
-
-# -----------------------------------------------------------------------------
-# LIBRARIES:
-library(rJava) # n?cessaire pour certains packages
-library(reshape2)
-library(lme4)
-require(FD)
-require(entropart)
-library(effects)
-library(afex) # for Kenward-Roger model correction
-library(glmmADMB)
-library(multcomp) # post-hoc Tukey
-library(MASS)
-library(Rmisc) # summarySE and multiplot
-library(predictmeans) # residplots
-library(dunn.test)
-library(ade4)
-library(adegraphics)
-library(vegan)
-library(cheddar)
-library(igraph)
-library(devtools)
-library(betapart)
-library(ggplot2)
-library(gridExtra)
-library(gtools)
-require(gplots)
-library(Hmisc)
-library(MuMIn)
-library(FSA) # fonction "Subset": enl?ve compl?tement le niveau des facteurs omis
-install_version("XLConnectJars", version = "0.2-12", repos = "http://cran.us.r-project.org") 
-install_version("XLConnect", version = "0.2-12", repos = "http://cran.us.r-project.org")
-library(xlsx) # Pour sauver les fichiers dans excel
-library(XLConnect) 
-# -----------------------------------------------------------------------------
-
-# -----------------------------------------------------------------------------
-# FUNCTIONS
-# -----------------------------------------------------------------------------
-# 1. Calcul des flux dans le r?seau
-Fluxfct <- function(DBtest) {
-  G<-vector(mode="numeric", length = nbinter)    
-  B<-vector(mode="numeric", length = nbinter)
-  A<-matrix(0, nrow = nbinter, ncol = nbinter)
-  diag(A)<-1
+# 1. Compute network fluxes
+Fluxfct <- function(DBtest, node, biomasstot, abundance, a, metaind) {
+  G <- vector(mode="numeric", length = nbinter)    
+  B <- vector(mode="numeric", length = nbinter)
+  A <- matrix(0, nrow = nbinter, ncol = nbinter)
+  diag(A) <- 1
   for (i in 1:nbgp) {
-    predi<-(subset(res, res$pred==i))
-    iprey<-predi$prey
+    predi <- (subset(res, res$pred==i))
+    iprey <- predi$prey
     if(length(iprey)>0){
       if (length(iprey)>1){
-        nobiom<-which(iprey==1|iprey==2)
+        nobiom <- which(iprey==1|iprey==2)
         Sum_nB<-0
         if (length(nobiom)>0) {
-          Sum_nB<-sum(predi$pred_pref[nobiom])
-          G[predi$numinter[nobiom]]<-predi$pred_pref[nobiom]
+          Sum_nB <- sum(predi$pred_pref[nobiom])
+          G[predi$numinter[nobiom]] <- predi$pred_pref[nobiom]
         }
-        withbiom<-which(iprey!=1&iprey!=2)
-        if (length(withbiom)>0){
-          Sum_wB<-sum(predi$pred_pref[withbiom]*DBtest$biomass[iprey[withbiom]])
+        withbiom <- which(iprey!=1&iprey!=2)
+        if (length(withbiom) > 0){
+          Sum_wB <- sum(predi$pred_pref[withbiom] * DBtest$biomass[iprey[withbiom]])
           G[predi$numinter[withbiom]]<-(1-Sum_nB)*predi$pred_pref[withbiom]*DBtest$biomass[iprey[withbiom]]/Sum_wB  
-          if (Sum_wB==0) { G[predi$numinter[withbiom]]<-predi$pred_pref[withbiom]*DBtest$biomass[iprey[withbiom]]  
-          G[predi$numinter[nobiom]]<-predi$pred_pref[nobiom]/Sum_nb } 
+          if (Sum_wB==0) { G[predi$numinter[withbiom]] <- predi$pred_pref[withbiom]*DBtest$biomass[iprey[withbiom]]  
+          G[predi$numinter[nobiom]] <- predi$pred_pref[nobiom]/Sum_nb } 
         }
       }
-      else  G[predi$numinter]<-1
-      B[predi$numinter] <- G[predi$numinter]*DBtest$abundance[i]*DBtest$metaind[i]/(DBtest$a[i])
+      else  G[predi$numinter] <- 1
       
-      preyi<-(subset(res,res$prey==i)) 
-      ipred<-preyi$pred
-      A[predi$numinter,preyi$numinter]<- A[predi$numinter,preyi$numinter] - G[predi$numinter]/(DBtest$a[i])
+      preyi <- (subset(res,res$prey==i)) 
+      ipred <- preyi$pred
+      A[predi$numinter,preyi$numinter] <- A[predi$numinter,preyi$numinter] - G[predi$numinter]/(DBtest$a[i])
     }
   }
-  F<-solve(A,B)         #F contient l'estimation des flux
+  F <- solve(A,B)         # flux estimates
   return(F)
 }
 
